@@ -1,0 +1,10 @@
+{
+  // Tick: app (pasta public) + servidor de dados e notificações (src/worker.js) num Worker só
+  "name": "tick",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-11-01",
+  "assets": { "directory": "./public", "binding": "ASSETS" },
+  "kv_namespaces": [{ "binding": "DADOS", "id": "8489eecf7a7f4a81a0f45a59daf0cb5c" }],
+  "triggers": { "crons": ["* * * * *"] },
+  "observability": { "enabled": true }
+}
