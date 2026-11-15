@@ -564,7 +564,7 @@ function shCfg(){
   <div class="note">As notificações passam a funcionar na versão publicada no Cloudflare.</div>
   <label class="f">Importar</label><button class="btn2" style="width:100%" onclick="document.getElementById('impF').click()">Importar registros (Excel)</button><input type="file" id="impF" accept=".xlsx,.xls" style="display:none" onchange="lerPunchin(this)">
   <label class="f">Backup</label><button class="btn2" style="width:100%;margin-bottom:8px" onclick="baixaBk()">Salvar backup (arquivo)</button><button class="btn2" style="width:100%" onclick="document.getElementById('bkF').click()">Restaurar backup</button><input type="file" id="bkF" accept=".json,application/json" style="display:none" onchange="restauraBk(this)">
-  <div class="acts"><button class="btn2" onclick="shClose()">Cancelar</button><button class="btn" onclick="savCfg()">Salvar</button></div>`);
+  <div class="acts"><button class="btn2" onclick="shClose()">Cancelar</button><button class="btn" onclick="savCfg()">Salvar</button></div><div class="note" style="text-align:center;margin-top:14px">Tick · versão 15/11/2026</div>`);
 }
 function savCfg(){
   S.cfg.empresa=document.getElementById('cE').value.trim()||'Trabalho';
