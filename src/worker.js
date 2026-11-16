@@ -257,14 +257,33 @@ async function cron(env) {
 
 async function status(env) {
   const us = (await env.DADOS.get('tick:users', 'json')) || [];
+  const A = agora();
+  const detalhes = [];
   let aparelhos = 0;
-  for (const uid of us) aparelhos += ((await env.DADOS.get('tick:subs:' + uid, 'json')) || []).length;
+  for (const uid of us) {
+    const subs = (await env.DADOS.get('tick:subs:' + uid, 'json')) || [];
+    aparelhos += subs.length;
+    const S = await env.DADOS.get('tick:data:' + uid, 'json');
+    const d = { usuario: uid.slice(0, 6), aparelhos: subs.length, comChaves: subs.filter(x => x.keys).length };
+    if (S) {
+      const cfg = S.cfg || {}, r = (S.dias || {})[A.key];
+      d.dadosAtualizadosEm = S.u ? new Date(S.u).toLocaleString('pt-BR', { timeZone: TZ }) : 'sem data';
+      d.config = { entrada: cfg.horaEntrada || '(vazio)', almoco: cfg.horaAlmoco || '(vazio)', intervalo: cfg.intervalo, antecedencia: cfg.antecedencia ?? 10, jornadaHoje: jornada(cfg, A.key, A.wd) };
+      d.hoje = { data: A.key, horaServidor: m2hm(A.min), tipo: (r && r.tipo) || 'trabalho', batidas: (r && r.batidas) || [] };
+      const ls = lembretes(S, A);
+      d.lembretesAgora = [];
+      for (const l of ls) d.lembretesAgora.push({ id: l.id, avisoAs: m2hm(l.quando), enviado: !!(await env.DADOS.get(`tick:sent:${uid}:${A.key}:${l.id}`)) });
+      d.enviadosHoje = [];
+      for (const id of ['entrada', 'almoco', 'volta', 'saida', 'esq-entrada', 'esq-saida', 'jornada']) if (await env.DADOS.get(`tick:sent:${uid}:${A.key}:${id}`)) d.enviadosHoje.push(id);
+    } else d.dados = 'nenhum dado sincronizado';
+    detalhes.push(d);
+  }
   return {
     servico: 'Tick',
     usuarios: us.length,
     aparelhos,
+    detalhes,
     ultimaVerificacao: (await env.DADOS.get('tick:status', 'json')) || 'nenhuma ainda (o agendamento grava a cada 15 min)',
     ultimoEnvio: (await env.DADOS.get('tick:ultimo-envio', 'json')) || 'nenhum ainda',
   };
 }
-
