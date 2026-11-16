@@ -131,7 +131,7 @@ async function encryptPayload(sub, payload) {
 }
 async function enviaPush(env, sub, msg) {
   const { t, k } = await jwt(env, new URL(sub.endpoint).origin);
-  const headers = { Authorization: `vapid t=${t}, k=${k}`, TTL: '3600', Urgency: 'high' };
+  const headers = { Authorization: `vapid t=${t}, k=${k}`, TTL: '86400', Urgency: 'high' };
   let body = null;
   if (sub.keys && sub.keys.p256dh && sub.keys.auth) {
     body = await encryptPayload(sub, JSON.stringify(msg));

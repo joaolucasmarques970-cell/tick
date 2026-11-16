@@ -590,7 +590,7 @@ function shCfg(){
   <div class="note">As notificações passam a funcionar na versão publicada no Cloudflare.</div>
   <label class="f">Importar</label><button class="btn2" style="width:100%" onclick="document.getElementById('impF').click()">Importar registros (Excel)</button><input type="file" id="impF" accept=".xlsx,.xls" style="display:none" onchange="lerPunchin(this)">
   <label class="f">Backup</label><button class="btn2" style="width:100%;margin-bottom:8px" onclick="baixaBk()">Salvar backup (arquivo)</button><button class="btn2" style="width:100%" onclick="document.getElementById('bkF').click()">Restaurar backup</button><input type="file" id="bkF" accept=".json,application/json" style="display:none" onchange="restauraBk(this)">
-  <div class="acts"><button class="btn2" onclick="shClose()">Cancelar</button><button class="btn" onclick="savCfg()">Salvar</button></div><div class="note" style="text-align:center;margin-top:14px">Tick · versão 16/11/2026</div>`);
+  <div class="acts"><button class="btn2" onclick="shClose()">Cancelar</button><button class="btn" onclick="savCfg()">Salvar</button></div><div class="note" style="text-align:center;margin-top:14px">Tick · versão 16/11/2026 · 2</div>`);
 }
 function savCfg(){
   S.cfg.empresa=document.getElementById('cE').value.trim()||'Trabalho';
@@ -705,13 +705,13 @@ let SY={sujo:false,ultimo:null,erro:false,t:null};
 try{SY.sujo=localStorage.getItem('tick-sujo')==='1';SY.ultimo=+localStorage.getItem('tick-sync')||null}catch(e){}
 function syncTexto(){if(!API||!CHAVE)return'Só neste aparelho';if(SY.erro||!navigator.onLine)return'Sem conexão · sincroniza depois';if(SY.sujo)return'Sincronizando…';return SY.ultimo?'Sincronizado às '+new Date(SY.ultimo).toTimeString().slice(0,5):'Conectado'}
 function atualizaSt(){const e=document.getElementById('syncSt');if(e)e.textContent=syncTexto()}
-function marcaSujo(){SY.sujo=true;try{localStorage.setItem('tick-sujo','1')}catch(e){}clearTimeout(SY.t);SY.t=setTimeout(sobe,1500)}
+function marcaSujo(){SY.sujo=true;try{localStorage.setItem('tick-sujo','1')}catch(e){}clearTimeout(SY.t);SY.t=setTimeout(sobe,200)}
 function okSync(){SY.sujo=false;SY.erro=false;SY.ultimo=Date.now();try{localStorage.setItem('tick-sujo','0');localStorage.setItem('tick-sync',String(SY.ultimo))}catch(e){}atualizaSt()}
 function adota(d){try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}S=load();if(!S.u)S.u=d.u;saveLocal();render()}
 async function api(path,opt){opt=opt||{};opt.headers=Object.assign({'X-Key':CHAVE,'Content-Type':'application/json'},opt.headers||{});const r=await fetch(API+path,opt);return r}
 async function sobe(){
   if(!API||!CHAVE||!SY.sujo)return;
-  try{const r=await api('/tick/data',{method:'PUT',body:JSON.stringify(S)});
+  try{const body=JSON.stringify(S);const r=await api('/tick/data',{method:'PUT',body,keepalive:body.length<60000});
     if(r.status===409){const srv=await r.json();adota(srv);okSync();toast('Dados atualizados de outro aparelho');return}
     if(!r.ok)throw 0;okSync()}catch(e){SY.erro=true;atualizaSt()}
 }
@@ -724,7 +724,8 @@ async function desce(){
 }
 function guardaChaveSW(){try{caches.open('tick-k').then(c=>c.put('./__k',new Response(JSON.stringify({k:CHAVE,api:API}))))}catch(e){}}
 window.addEventListener('online',()=>{SY.erro=false;sobe();desce()});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')desce()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')desce();else if(SY.sujo)sobe()});
+window.addEventListener('pagehide',()=>{if(SY.sujo)sobe()});
 setInterval(()=>{if(SY.sujo)sobe()},60000);
 function copiaLink(){const u=location.origin+location.pathname+'#k='+CHAVE;navigator.clipboard.writeText(u).then(()=>toast('Link copiado')).catch(()=>toast(u))}
 
