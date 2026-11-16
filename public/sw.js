@@ -1,5 +1,5 @@
 // Tick: funciona offline e recebe notificações
-const C = 'tick-v10';
+const C = 'tick-v11';
 const SHELL = ['./', './index.html', './config.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/favicon-32.png'];
 const XLSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
 
